@@ -1,7 +1,11 @@
 submitted_by,company,category,brand,item,measurement,quantity,quantity_unit,rate,phone,address,status,offered_quality,offered_certifications,delivery_boy_name,delivery_boy_phone,scheduled_delivery_datetime
-abc,ABC,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 53,100,Bags,150.01,9778061676,"NH 66, Edappally, Kochi, Kerala 682024",Delivered,Premium,"ISI Mark, BIS Hallmark, GreenPro Certified",Anu,9778061676.0,2025-08-07 09:00:00
+abc,ABC,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 53,100,Bags,150.01,9778061676,"NH 66, Edappally, Kochi, Kerala 682024",Reviewed,Premium,"ISI Mark, BIS Hallmark, GreenPro Certified",Anu,9778061676.0,2025-08-07 09:00:00
 def,DEF,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 53,100,Bags,140.01,6745362789,"Lulu International Shopping Mall, Edappally, Kochi, Kerala 15",Awaiting Certificates,Premium,"ISI Mark, BIS Hallmark, GreenPro Certified",,,
 ghi,ghi,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 53,250,Bags,230.01,4536274578,"Cusat, kochi, kerala ",Awaiting Certificates,Premium,"ISI Mark, GreenPro Certified",,,
 jkl,JKL,Cement,Ambuja,OPC 53 Grade Cement (per bag),OPC 53,100,Bags,150.01,9778061674,"Kakkanad. kerala, India",Awaiting Certificates,Standard,"ISI Mark, BIS Hallmark, ISO 9001, GreenPro Certified",,,
-abc,abc,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 43,10,Bags,10.01,2345678976,"Kakkanad. kerala, India",Certificates Submitted,Premium,BIS Hallmark,,,
-abc,abc,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 53,10,Bags,100.01,9778061676,"Marine drive, kochi, kerala 100",Awaiting Certificates,Premium,"BIS/ISI Certificate, MTC (Batch-wise), Product Specification Sheet",,,
+abc,abc,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 43,10,Bags,10.01,2345678976,"Kakkanad. kerala, India",Accepted,Premium,BIS Hallmark,,,
+abc,abc,Cement,Ultratech,OPC 53 Grade Cement (per bag),OPC 53,10,Bags,100.01,9778061676,"Marine drive, kochi, kerala 100",Accepted,Premium,"BIS/ISI Certificate, MTC (Batch-wise), Product Specification Sheet",,,
+BC,BC,Cement,Ultratech,OPC 43 Grade cement,OPC 43,100,Bags,200.01,1234567896,"Kakkanad. kerala, India",Accepted,Premium,ISO Certification of Manufacturer,,,
+BC,bc,Cement,Ultratech,OPC 43 Grade cement,OPC 43,100,Bags,200.01,1234567896,"Kakkanad. kerala, India",Accepted,Premium,ISO Certification of Manufacturer,,,
+abc,abc,Cement,Ultratech,cement opc 43,OPC 43,200,Bags,100.01,1234567890,"Kakkanad. kerala, India",Awaiting Certificates,Premium,"MTC (Batch-wise), Product Specification Sheet",,,
+xxx,xxx,Steel,TATA,TMT Rods,8mm,100,Tonnes,150.01,1234567890,"Marine drive, kochi, kerala 100",Delivered,Premium,"ISO Certificate (of manufacturer), MTC with Heat Number",fdf,1234567890.0,2025-08-09 09:00:00
