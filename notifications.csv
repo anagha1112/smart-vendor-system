@@ -1,0 +1,31 @@
+username,message,timestamp,is_read
+procure_user,New proposal from BC.,2025-08-07 14:35:06,False
+procure_user,New proposal from ABC.,2025-08-07 14:36:45,False
+procure_user,New proposal from DEF.,2025-08-07 14:37:52,False
+procure_user,New proposal from ghi.,2025-08-07 14:38:58,False
+procure_user,New proposal from JKL.,2025-08-07 14:39:52,False
+ghi,ACTION: Please submit certificates for your 'OPC 53 Grade Cement (per bag)' proposal.,2025-08-07 19:14:01,False
+def,ACTION: Please submit certificates for your 'OPC 53 Grade Cement (per bag)' proposal.,2025-08-07 19:14:19,False
+abc,ACTION: Please submit certificates for your 'OPC 53 Grade Cement (per bag)' proposal.,2025-08-07 19:18:19,False
+procure_user,Certificates submitted for 'OPC 53 Grade Cement (per bag)' from ABC.,2025-08-07 19:19:13,False
+abc,Your proposal for 'OPC 53 Grade Cement (per bag)' has been ACCEPTED.,2025-08-07 19:19:51,False
+site_user,Approved: 'OPC 53 Grade Cement (per bag)' from ABC.,2025-08-07 19:19:51,False
+procure_user,DISPATCHED: 'OPC 53 Grade Cement (per bag)' from ABC.,2025-08-07 19:27:41,False
+site_user,DELIVERY: 'OPC 53 Grade Cement (per bag)' from ABC scheduled for 2025-08-07 09:00.,2025-08-07 19:27:41,False
+abc,Delivery of 'OPC 53 Grade Cement (per bag)' was received.,2025-08-07 19:30:24,False
+procure_user,DELIVERED: 'OPC 53 Grade Cement (per bag)' from ABC.,2025-08-07 19:30:24,False
+procure_user,New proposal from abc.,2025-08-07 21:24:06,False
+jkl,ACTION: Please submit certificates for your 'OPC 53 Grade Cement (per bag)' proposal.,2025-08-07 21:49:39,False
+abc,ACTION: Please submit certificates for your 'OPC 53 Grade Cement (per bag)' proposal.,2025-08-07 21:51:26,False
+procure_user,New document 'Company Profile' submitted by abc.,2025-08-07 21:52:20,False
+procure_user,New document 'Company Profile' submitted by abc.,2025-08-07 22:06:08,False
+procure_user,New document 'Company Profile' submitted by abc.,2025-08-07 22:06:21,False
+procure_user,New document 'Company Registration Certificate' submitted by abc.,2025-08-07 22:06:28,False
+procure_user,New document 'Certificate of Incorporation' submitted by abc.,2025-08-07 22:06:33,False
+procure_user,New document 'Copy of organization chart' submitted by abc.,2025-08-07 22:06:38,False
+procure_user,New document 'Audited annual account (last 3 years)' submitted by abc.,2025-08-07 22:06:43,False
+procure_user,New document 'Performance feedback certificate (from 2 customers)' submitted by abc.,2025-08-07 22:06:49,False
+procure_user,New proposal from abc.,2025-08-07 22:23:03,False
+procure_user,Certificates submitted for 'OPC 53 Grade Cement (per bag)' from abc.,2025-08-07 22:23:16,False
+abc,ACTION: Please submit certificates for your 'OPC 53 Grade Cement (per bag)' proposal.,2025-08-07 22:23:44,False
+procure_user,New vendor 'qrs' has registered and submitted documents for verification.,2025-08-07 22:29:38,False

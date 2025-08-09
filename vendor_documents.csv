@@ -1,0 +1,14 @@
+vendor_username,document_type,document_details,submitted_on,status
+abc,Company Profile,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:06:21,Pending Verification
+abc,Company Registration Certificate,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:06:28,Pending Verification
+abc,Certificate of Incorporation,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:06:33,Pending Verification
+abc,Copy of organization chart,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:06:38,Pending Verification
+abc,Audited annual account (last 3 years),https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:06:43,Pending Verification
+abc,Performance feedback certificate (from 2 customers),https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:06:49,Pending Verification
+qrs,GST Registration Certificate,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
+qrs,PAN Card Copy,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
+qrs,Company Registration / Trade License,https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
+qrs,ISO 9001: Quality Management Certificate (if applicable),https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
+qrs,Authorized Dealership Certificate (if the vendor is a dealer),https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
+qrs,Manufacturer’s Test Certificate (MTC),https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
+qrs,Third-Party Lab Test Report (if required by client or consultant),https://coursera.org/share/a39add7874bfb3a4015bef39e73c1a64,2025-08-07 22:29:38,Pending Verification
