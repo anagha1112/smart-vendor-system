@@ -19,7 +19,7 @@ except ImportError:
 
 # --- Google Maps Client Initialization ---
 try:
-    gmaps = googlemaps.Client(key=st.secrets["Maps_API_KEY"])
+    gmaps = googlemaps.Client(key=st.secrets["GOOGLE_MAPS_API_KEY"])
 except (FileNotFoundError, KeyError):
     gmaps = None
 
@@ -109,6 +109,8 @@ st.session_state.setdefault("page", "Login")
 st.session_state.setdefault("analysis_results", None)
 st.session_state.setdefault("analyzed_category", None)
 st.session_state.setdefault("edit_req_idx", None)
+st.session_state.setdefault("edit_proposal_idx", None)
+
 
 # --- Helper Functions ---
 def load_and_validate_df(file_path, columns):
@@ -331,8 +333,45 @@ def vendor_dashboard():
         if pending.empty:
             st.info("No pending proposals.")
         else:
-            for _, row in pending.iterrows():
-                st.write(f"**Item:** {row['item']} ({row['measurement']}) | **Brand:** {row['brand']} | **Status:** {row['status']}")
+            for index, row in pending.iterrows():
+                col1, col2 = st.columns([4, 1])
+                with col1:
+                    st.write(f"**Item:** {row['item']} ({row['measurement']}) | **Brand:** {row['brand']} | **Status:** {row['status']}")
+                with col2:
+                    if st.button("Edit", key=f"edit_{index}"):
+                        st.session_state.edit_proposal_idx = index
+                        st.rerun()
+        
+        if st.session_state.edit_proposal_idx is not None:
+            edit_index = st.session_state.edit_proposal_idx
+            proposal_to_edit = my_proposals.loc[edit_index]
+            with st.form("edit_proposal_form"):
+                st.warning(f"Editing proposal for: **{proposal_to_edit['item']}**")
+                
+                company = st.text_input("Company Name", value=proposal_to_edit['company'])
+                brand = st.text_input("Brand", value=proposal_to_edit['brand'])
+                item = st.text_input("Item Name", value=proposal_to_edit['item'])
+                measurement = st.text_input("Measurement", value=proposal_to_edit['measurement'])
+                quantity = st.number_input("Quantity", value=int(proposal_to_edit['quantity']))
+                rate = st.number_input("Rate", value=float(proposal_to_edit['rate']))
+                phone = st.text_input("Phone Number", value=proposal_to_edit['phone'], max_chars=10)
+                address = st.text_input("Address", value=proposal_to_edit['address'])
+
+                save_col, cancel_col = st.columns(2)
+                if save_col.form_submit_button("Save Changes"):
+                    if phone.isdigit() and len(phone) == 10:
+                        df.loc[edit_index, ['company', 'brand', 'item', 'measurement', 'quantity', 'rate', 'phone', 'address']] = [company, brand, item, measurement, quantity, rate, phone, address]
+                        df.to_csv(VENDORS_FILE, index=False)
+                        st.session_state.edit_proposal_idx = None
+                        st.success("Proposal updated!")
+                        st.rerun()
+                    else:
+                        st.error("Please enter a valid 10-digit phone number.")
+
+                if cancel_col.form_submit_button("Cancel"):
+                    st.session_state.edit_proposal_idx = None
+                    st.rerun()
+
 
     with tab3:
         st.header("Action Required: Email Certificates")
@@ -410,7 +449,7 @@ def procurement_dashboard():
 
     tab1, tab2, tab3 = st.tabs(["🏆 Smart Analysis", f"📜 Certificate Verification ({cert_pending_count})", "🚚 Track Deliveries"])
     with tab1:
-        with st.expander("📝 Set Project Requirements"):
+        with st.expander("📝 Set & Manage Project Requirements"):
             st.selectbox("Category", list(BRAND_OPTIONS.keys()) + ["Other"], key="req_cat_selector")
             with st.form("req_form", clear_on_submit=True):
                 category = st.session_state.req_cat_selector
@@ -433,7 +472,45 @@ def procurement_dashboard():
             
             st.subheader("Current Requirements")
             try:
-                st.dataframe(pd.read_csv(REQUIREMENTS_FILE), use_container_width=True)
+                reqs_df = load_and_validate_df(REQUIREMENTS_FILE, REQUIREMENT_COLUMNS)
+                if st.session_state.edit_req_idx is not None:
+                    edit_index = st.session_state.edit_req_idx
+                    req_to_edit = reqs_df.iloc[edit_index]
+                    with st.form("edit_req_form"):
+                        st.warning(f"Editing requirement for: **{req_to_edit['item_name']}**")
+                        rate = st.number_input("Budgeted Rate", value=float(req_to_edit['budgeted_rate']))
+                        edit_quantity_unit = req_to_edit.get('budgeted_quantity_unit', QUANTITY_UNITS.get(req_to_edit['item_category'], "Units"))
+                        quantity = st.number_input(f"Budgeted Quantity (in {edit_quantity_unit})", value=int(req_to_edit['budgeted_quantity']))
+                        
+                        save_col, cancel_col = st.columns(2)
+                        if save_col.form_submit_button("Save Changes"):
+                            reqs_df.loc[edit_index, 'budgeted_rate'] = rate
+                            reqs_df.loc[edit_index, 'budgeted_quantity'] = quantity
+                            reqs_df.to_csv(REQUIREMENTS_FILE, index=False)
+                            st.session_state.edit_req_idx = None
+                            st.success("Requirement updated!")
+                            st.rerun()
+                        if cancel_col.form_submit_button("Cancel"):
+                            st.session_state.edit_req_idx = None
+                            st.rerun()
+                else:
+                    if reqs_df.empty:
+                        st.info("No requirements set.")
+                    else:
+                        for index, row in reqs_df.iterrows():
+                            display_quantity_unit = row.get('budgeted_quantity_unit', QUANTITY_UNITS.get(row['item_category'], "Units"))
+                            col1, col2, col3, col4, col5 = st.columns([4, 2, 2, 1, 1])
+                            col1.write(f"**{row['item_name']}** ({row['item_category']})")
+                            col2.write(f"Rate: ₹{row['budgeted_rate']:.2f}")
+                            col3.write(f"Qty: {row['budgeted_quantity']} {display_quantity_unit}")
+                            if col4.button("Edit", key=f"edit_{index}"):
+                                st.session_state.edit_req_idx = index
+                                st.rerun()
+                            if col5.button("Delete", key=f"del_{index}"):
+                                reqs_df.drop(index, inplace=True)
+                                reqs_df.to_csv(REQUIREMENTS_FILE, index=False)
+                                st.rerun()
+
             except (FileNotFoundError, pd.errors.EmptyDataError):
                 st.info("No requirements set.")
 
@@ -522,31 +599,29 @@ def procurement_dashboard():
     with tab2:
         st.header("📜 Certificate Verification")
         proposals_df = load_and_validate_df(VENDORS_FILE, VENDOR_COLUMNS)
-        cert_pending = proposals_df[proposals_df['status'].isin(['Awaiting Certificates', 'Certificates Submitted'])]
+        cert_pending = proposals_df[proposals_df['status'] == 'Certificates Submitted']
         if cert_pending.empty:
-            st.info("No proposals are currently awaiting certificate verification.")
+            st.info("No proposals are currently awaiting final verification.")
         else:
             for index, row in cert_pending.iterrows():
                 with st.container(border=True):
                     st.subheader(f"Final Verification: {row['item']} from {row['company']}")
-                    if row['status'] == 'Awaiting Certificates':
-                        st.warning("Waiting for vendor to confirm they have emailed certificates.")
-                    else: # Certificates Submitted
-                        st.info("This vendor has confirmed they have emailed the required certificates. Please verify them in your inbox.")
-                        ac1, ac2 = st.columns(2)
-                        if ac1.button("✅ Final Accept", key=f"final_acc_{index}"):
-                            proposals_df.loc[index, 'status'] = "Accepted"
-                            proposals_df.to_csv(VENDORS_FILE, index=False)
-                            add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' has been ACCEPTED.")
-                            add_notification("ALL_SITE", f"Approved: '{row['item']}' from {row['company']}.")
-                            st.success(f"Accepted proposal from {row['company']}.")
-                            st.rerun()
-                        if ac2.button("❌ Final Reject", key=f"final_rej_{index}"):
-                            proposals_df.loc[index, 'status'] = "Rejected"
-                            proposals_df.to_csv(VENDORS_FILE, index=False)
-                            add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' was rejected after review.")
-                            st.warning(f"Rejected proposal from {row['company']}.")
-                            st.rerun()
+                    st.info("This vendor has confirmed they have emailed the required certificates. Please verify them in your inbox.")
+                    
+                    ac1, ac2 = st.columns(2)
+                    if ac1.button("✅ Final Accept", key=f"final_acc_{index}"):
+                        proposals_df.loc[index, 'status'] = "Accepted"
+                        proposals_df.to_csv(VENDORS_FILE, index=False)
+                        add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' has been ACCEPTED.")
+                        add_notification("ALL_SITE", f"Approved: '{row['item']}' from {row['company']}.")
+                        st.success(f"Accepted proposal from {row['company']}.")
+                        st.rerun()
+                    if ac2.button("❌ Final Reject", key=f"final_rej_{index}"):
+                        proposals_df.loc[index, 'status'] = "Rejected"
+                        proposals_df.to_csv(VENDORS_FILE, index=False)
+                        add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' was rejected after review.")
+                        st.warning(f"Rejected proposal from {row['company']}.")
+                        st.rerun()
     
     with tab3:
         st.header("🚚 Track Deliveries")
