@@ -1,11 +1,6 @@
 username,password,role
 procure_user,proc123,Procurement
 site_user,site123,Site
-abc,N/A,Vendor
-def,N/A,Vendor
-ghi,N/A,Vendor
-jkl,N/A,Vendor
-qrs,N/A,Vendor
-adc,N/A,Vendor
-BC,N/A,Vendor
-xxx,N/A,Vendor
+ABC,N/A,Vendor
+DEF,N/A,Vendor
+GHI,N/A,Vendor

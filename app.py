@@ -19,7 +19,7 @@ except ImportError:
 
 # --- Google Maps Client Initialization ---
 try:
-    gmaps = googlemaps.Client(key=st.secrets["GOOGLE_MAPS_API_KEY"])
+    gmaps = googlemaps.Client(key=st.secrets["Maps_API_KEY"])
 except (FileNotFoundError, KeyError):
     gmaps = None
 
@@ -30,6 +30,7 @@ NOTIFICATIONS_FILE = "notifications.csv"
 REQUIREMENTS_FILE = "requirements.csv" 
 REVIEWS_FILE = "reviews.csv"
 CERTIFICATES_FILE = "certificates.csv"
+VENDOR_PROFILES_FILE = "vendor_profiles.csv" # New file for company profile info
 
 # --- Global Data Definitions ---
 BRAND_OPTIONS = {
@@ -51,6 +52,7 @@ QUANTITY_UNITS = {
     "Wood": "Cubic Feet"
 }
 QUALITY_LEVELS = ["Premium", "Standard", "Basic"]
+OWNERSHIP_TYPES = ["Private", "Government", "Cooperative"]
 MATERIAL_CERTIFICATIONS = {
     "Cement": ["BIS/ISI Certificate", "MTC (Batch-wise)", "ISO Certification of Manufacturer", "Product Specification Sheet"],
     "Steel": ["BIS/ISI Certificate", "MTC with Heat Number", "ISO Certificate (of manufacturer)", "Brand Authorization Letter"],
@@ -74,6 +76,8 @@ VENDOR_COLUMNS = [
 REVIEW_COLUMNS = ["proposal_index", "rating", "review", "reviewed_by", "timestamp"]
 REQUIREMENT_COLUMNS = ["item_category", "item_name", "budgeted_rate", "budgeted_quantity", "budgeted_quantity_unit", "required_quality", "required_certifications", "required_delivery_date"]
 CERTIFICATE_COLUMNS = ["proposal_index", "certification_type", "certificate_details", "submitted_on"]
+VENDOR_PROFILE_COLUMNS = ["vendor_username", "year_of_establishment", "ownership_type"]
+
 
 # --- File Creation ---
 def initialize_csv(file_path, columns):
@@ -87,6 +91,7 @@ initialize_csv(NOTIFICATIONS_FILE, ["username", "message", "timestamp", "is_read
 initialize_csv(REQUIREMENTS_FILE, REQUIREMENT_COLUMNS)
 initialize_csv(REVIEWS_FILE, REVIEW_COLUMNS)
 initialize_csv(CERTIFICATES_FILE, CERTIFICATE_COLUMNS)
+initialize_csv(VENDOR_PROFILES_FILE, VENDOR_PROFILE_COLUMNS)
 
 
 if not os.path.exists(USERS_FILE):
@@ -108,7 +113,8 @@ st.session_state.setdefault("edit_req_idx", None)
 # --- Helper Functions ---
 def load_and_validate_df(file_path, columns):
     try:
-        df = pd.read_csv(file_path)
+        dtype_spec = {'phone': str, 'delivery_boy_phone': str}
+        df = pd.read_csv(file_path, dtype=dtype_spec)
         for col in columns:
             if col not in df.columns:
                 df[col] = ""
@@ -186,11 +192,14 @@ def display_notifications():
 # --- Auth Pages ---
 def signup_page():
     st.title("📝 Vendor Registration")
-    st.info("Please choose a username to create your account.")
+    st.info("Please provide your company details to create an account.")
     with st.form("signup_form"):
         new_username = st.text_input("Choose a Username")
+        year_of_establishment = st.number_input("Year of Establishment", min_value=1900, max_value=datetime.now().year, step=1)
+        ownership_type = st.selectbox("Ownership Type", OWNERSHIP_TYPES)
+
         if st.form_submit_button("Register as Vendor"):
-            if new_username:
+            if new_username and year_of_establishment and ownership_type:
                 try:
                     users_df = pd.read_csv(USERS_FILE)
                     if not users_df[(users_df['username'] == new_username) & (users_df['role'] == "Vendor")].empty:
@@ -198,19 +207,30 @@ def signup_page():
                     else:
                         with open(USERS_FILE, "a", newline='', encoding='utf-8') as f:
                             csv.writer(f).writerow([new_username, "N/A", "Vendor"])
+                        
+                        with open(VENDOR_PROFILES_FILE, "a", newline='', encoding='utf-8') as f:
+                            csv.writer(f).writerow([new_username, year_of_establishment, ownership_type])
+
                         add_notification("ALL_PROCUREMENT", f"New vendor '{new_username}' has registered.")
                         st.success("Account created! Please log in.")
                         switch_page("Login")
                 except (FileNotFoundError, pd.errors.EmptyDataError):
+                    # Handle case where files don't exist
                     with open(USERS_FILE, "w", newline='', encoding='utf-8') as f:
                         writer = csv.writer(f)
                         writer.writerow(["username", "password", "role"])
                         writer.writerow([new_username, "N/A", "Vendor"])
+                    
+                    with open(VENDOR_PROFILES_FILE, "w", newline='', encoding='utf-8') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(VENDOR_PROFILE_COLUMNS)
+                        writer.writerow([new_username, year_of_establishment, ownership_type])
+
                     add_notification("ALL_PROCUREMENT", f"New vendor '{new_username}' has registered.")
                     st.success("Account created! Please log in.")
                     switch_page("Login")
             else:
-                st.warning("Please enter a username.")
+                st.warning("Please fill in all fields.")
     if st.button("Already have an account? Login"):
         switch_page("Login")
 
@@ -260,7 +280,10 @@ def vendor_dashboard():
 
     st.markdown("---")
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Submit Proposal", "Pending", "Action Required", "Accepted", "History"])
+    action_required_count = len(my_proposals[my_proposals['status'] == 'Awaiting Certificates'])
+    accepted_count = len(my_proposals[my_proposals['status'] == 'Accepted'])
+    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Submit Proposal", "Pending", f"Action Required ({action_required_count})", f"Accepted ({accepted_count})", "History"])
 
     with tab1:
         st.selectbox("1. Select Item Category", list(BRAND_OPTIONS.keys()) + ["Other"], key="vendor_category_selector")
@@ -371,7 +394,7 @@ def vendor_dashboard():
                             if not review_data.empty:
                                 st.success("This delivery has been reviewed.")
                                 review = review_data.iloc[0]
-                                st.write(f"**Rating:** {'⭐' * review['rating']}")
+                                st.write(f"**Rating:** {'⭐' * int(review['rating'])}")
                                 st.write(f"**Feedback:** {review['review']}")
                             else:
                                 st.info("Review data not found.")
@@ -381,7 +404,11 @@ def vendor_dashboard():
 
 def procurement_dashboard():
     st.title("📊 Procurement Dashboard")
-    tab1, tab2, tab3 = st.tabs(["🏆 Smart Analysis", "📜 Certificate Verification", "🚚 Track Deliveries"])
+    
+    proposals_df = load_and_validate_df(VENDORS_FILE, VENDOR_COLUMNS)
+    cert_pending_count = len(proposals_df[proposals_df['status'].isin(['Awaiting Certificates', 'Certificates Submitted'])])
+
+    tab1, tab2, tab3 = st.tabs(["🏆 Smart Analysis", f"📜 Certificate Verification ({cert_pending_count})", "🚚 Track Deliveries"])
     with tab1:
         with st.expander("📝 Set Project Requirements"):
             st.selectbox("Category", list(BRAND_OPTIONS.keys()) + ["Other"], key="req_cat_selector")
@@ -413,7 +440,6 @@ def procurement_dashboard():
         st.header("🏆 Smart Proposal Analysis")
         try:
             reqs_df = load_and_validate_df(REQUIREMENTS_FILE, REQUIREMENT_COLUMNS)
-            proposals_df = load_and_validate_df(VENDORS_FILE, VENDOR_COLUMNS)
             if reqs_df.empty:
                 st.info("Set a requirement to enable analysis.")
             else:
@@ -496,30 +522,32 @@ def procurement_dashboard():
     with tab2:
         st.header("📜 Certificate Verification")
         proposals_df = load_and_validate_df(VENDORS_FILE, VENDOR_COLUMNS)
-        cert_pending = proposals_df[proposals_df['status'] == 'Certificates Submitted']
+        cert_pending = proposals_df[proposals_df['status'].isin(['Awaiting Certificates', 'Certificates Submitted'])]
         if cert_pending.empty:
-            st.info("No proposals are currently awaiting final verification.")
+            st.info("No proposals are currently awaiting certificate verification.")
         else:
             for index, row in cert_pending.iterrows():
                 with st.container(border=True):
                     st.subheader(f"Final Verification: {row['item']} from {row['company']}")
-                    st.info("This vendor has confirmed they have emailed the required certificates. Please verify them in your inbox.")
-                    
-                    ac1, ac2 = st.columns(2)
-                    if ac1.button("✅ Final Accept", key=f"final_acc_{index}"):
-                        proposals_df.loc[index, 'status'] = "Accepted"
-                        proposals_df.to_csv(VENDORS_FILE, index=False)
-                        add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' has been ACCEPTED.")
-                        add_notification("ALL_SITE", f"Approved: '{row['item']}' from {row['company']}.")
-                        st.success(f"Accepted proposal from {row['company']}.")
-                        st.rerun()
-                    if ac2.button("❌ Final Reject", key=f"final_rej_{index}"):
-                        proposals_df.loc[index, 'status'] = "Rejected"
-                        proposals_df.to_csv(VENDORS_FILE, index=False)
-                        add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' was rejected after review.")
-                        st.warning(f"Rejected proposal from {row['company']}.")
-                        st.rerun()
-
+                    if row['status'] == 'Awaiting Certificates':
+                        st.warning("Waiting for vendor to confirm they have emailed certificates.")
+                    else: # Certificates Submitted
+                        st.info("This vendor has confirmed they have emailed the required certificates. Please verify them in your inbox.")
+                        ac1, ac2 = st.columns(2)
+                        if ac1.button("✅ Final Accept", key=f"final_acc_{index}"):
+                            proposals_df.loc[index, 'status'] = "Accepted"
+                            proposals_df.to_csv(VENDORS_FILE, index=False)
+                            add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' has been ACCEPTED.")
+                            add_notification("ALL_SITE", f"Approved: '{row['item']}' from {row['company']}.")
+                            st.success(f"Accepted proposal from {row['company']}.")
+                            st.rerun()
+                        if ac2.button("❌ Final Reject", key=f"final_rej_{index}"):
+                            proposals_df.loc[index, 'status'] = "Rejected"
+                            proposals_df.to_csv(VENDORS_FILE, index=False)
+                            add_notification(row['submitted_by'], f"Your proposal for '{row['item']}' was rejected after review.")
+                            st.warning(f"Rejected proposal from {row['company']}.")
+                            st.rerun()
+    
     with tab3:
         st.header("🚚 Track Deliveries")
         try:
@@ -552,7 +580,16 @@ def site_dashboard():
         st.warning("No items are currently in the delivery or review phase.")
         return
 
-    tab1, tab2, tab3, tab4 = st.tabs(["🚚 Incoming Deliveries", "⭐ Pending Review", "👍 Approved & Waiting", "📖 Completed History"])
+    # Dynamic Tab Labels
+    incoming_count = len(site_df[site_df['status'] == "Out for Delivery"])
+    pending_review_count = len(site_df[site_df['status'] == "Delivered"])
+    
+    tab1, tab2, tab3, tab4 = st.tabs([
+        f"🚚 Incoming Deliveries ({incoming_count})", 
+        f"⭐ Pending Review ({pending_review_count})", 
+        "👍 Approved & Waiting", 
+        "📖 Completed History"
+    ])
 
     with tab1:
         incoming_df = site_df[site_df['status'] == "Out for Delivery"]
@@ -581,7 +618,9 @@ def site_dashboard():
                 with st.container(border=True):
                     st.subheader(f"Review: {row['item']} from {row['company']}")
                     with st.form(key=f"review_form_{index}"):
-                        rating = st.selectbox("Rate material quality (1-5 Stars)", list(range(1, 6)), index=4)
+                        rating_options = ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐']
+                        rating_str = st.radio("Rate material quality:", rating_options, index=4, horizontal=True)
+                        rating = len(rating_str)
                         review_text = st.text_area("Review (optional)")
                         if st.form_submit_button("Submit Review"):
                             with open(REVIEWS_FILE, "a", newline='', encoding='utf-8') as f:
@@ -616,7 +655,7 @@ def site_dashboard():
                     try:
                         reviews_df = pd.read_csv(REVIEWS_FILE)
                         review_data = reviews_df[reviews_df['proposal_index'] == index].iloc[0]
-                        st.write(f"**Your Rating:** {'⭐' * review_data['rating']}")
+                        st.write(f"**Your Rating:** {'⭐' * int(review_data['rating'])}")
                         st.write(f"**Your Feedback:** {review_data['review']}")
                     except (FileNotFoundError, pd.errors.EmptyDataError, IndexError):
                         st.write("Could not retrieve review details.")

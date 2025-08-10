@@ -1,9 +1,2 @@
 item_category,item_name,budgeted_rate,budgeted_quantity,budgeted_quantity_unit,required_quality,required_certifications,required_delivery_date
-Cement,Cement,280.01,150,Bags,Standard,"ISI Mark, ISO 9001",2025-08-13
-Cement,Cement,350.01,100,Bags,Premium,ISO 9001,2025-08-13
-Cement,OPC 53 grade cement,200.01,50,Bags,Premium,"ISO 9001, ISI Mark",2025-08-07
-Cement,Cemenrt,250.01,80,Bags,Premium,"ISI Mark, ISO 9001",2025-08-12
-Cement,OPC 53 Grade Cement,250.01,70,Bags,Premium,"ISI Mark, ISO 9001",2025-08-12
-Cement,OPC 53 Grade Cement (per bag),250.01,80,Bags,Premium,"ISI Mark, ISO 9001",2025-08-07
-Cement,OPC 53 Grade Cement (per bag),250.01,70,Bags,Premium,ISO 9001,2025-08-07
-Steel,Steel,200.01,50,Tonnes,Premium,ISO Certificate (of manufacturer),2025-08-12
+Steel,Steel,560.01,160,Tonnes,Premium,ISO Certificate (of manufacturer),2025-08-10
