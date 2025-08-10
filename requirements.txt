@@ -4,3 +4,5 @@ numpy
 googlemaps
 polyline
 pydeck
+psycopg2-binary
+sqlalchemy
